@@ -140,6 +140,12 @@ Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.RecommendationService, "REST
 Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.NotificationService, "REST-запрос", $techn="HTTPS/JSON")
 
 
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.MetaMoviesService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.RatingAndFavoriteService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.SubscriptionService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.PaymentService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ExtSystem.KeyCloak, CinemaAbyssSystem.ApiGateWay, "REST-запрос", $techn="HTTPS/JSON")
+
 Rel(CinemaAbyssSystem.ExtSystem.Recommendation, CinemaAbyssSystem.ExtSystem.Kafka, "Очередь")
 Rel(CinemaAbyssSystem.ExtSystem.Kafka, CinemaAbyssSystem.ExtSystem.Recommendation, "Очередь")
 Rel(CinemaAbyssSystem.HistoryMoviesService, CinemaAbyssSystem.ExtSystem.Kafka, "Очередь")
