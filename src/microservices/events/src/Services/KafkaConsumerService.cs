@@ -13,10 +13,10 @@ namespace events.Services
         private readonly IHostApplicationLifetime _lifetime;
         private ILogger<KafkaConsumerService> _logger;
 
-        private string _eventTopicUser = "User";
-        private string _eventTopicPayment = "Payment";
-        private string _eventTopicMovie = "Movie";
-
+        private string _eventTopicUser = "user-events";
+        private string _eventTopicPayment = "payment-events";
+        private string _eventTopicMovie = "movie-events";
+        
         public KafkaConsumerService(
             ILogger<KafkaConsumerService> logger, 
             IHostApplicationLifetime lifetime, 
