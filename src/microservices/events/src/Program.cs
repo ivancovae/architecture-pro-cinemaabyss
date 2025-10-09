@@ -1,6 +1,7 @@
 using events.Services;
 using events.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using System.Reflection.PortableExecutable;
 
 public class Program
@@ -8,10 +9,28 @@ public class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        builder.Configuration
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .AddEnvironmentVariables();
 
-        var bootstrapServers = builder.Configuration.GetValue<string>("Kafka:BootstrapServers");
+        IConfiguration configuration = new ConfigurationBuilder()
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddEnvironmentVariables()
+                        .Build();
+
+        Console.WriteLine("---=== Parameters StartUp ===---");
+        var _port = configuration.GetValue<string>("PORT") ?? "";
+        Console.WriteLine($"PORT={_port}");
+
+        var _kafkaBrokers = configuration.GetValue<string>("KAFKA_BROKERS") ?? "";
+        Console.WriteLine($"KAFKA_BROKERS={_kafkaBrokers}");
+
+        var jbootstrapServers = new JObject();
+        jbootstrapServers.Add("BootstrapServers", _kafkaBrokers);
+        configuration["Kafka"] = jbootstrapServers.ToString();
+        configuration["urls"] = $"http://0.0.0.0:{_port}";
+
+        var bootstrapServers = builder.Configuration.GetValue<string>("Kafka:BootstrapServers") ?? "";
         builder.Services.AddSingleton<IKafkaProducerService>(new KafkaProducerService(bootstrapServers));
 
         builder.Services.AddHostedService(service =>

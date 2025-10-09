@@ -17,19 +17,35 @@ namespace proxy
         public Startup(IConfiguration configuration)
         {
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
             configuration = builder.Build();
             Configuration = configuration;
+
+            Console.WriteLine("---=== Parameters StartUp ===---");
+            var _port = Configuration.GetValue<string>("PORT") ?? "";
+            Console.WriteLine($"PORT={_port}");
+
+            var _monolithServiceURL = Configuration.GetValue<string>("MONOLITH_URL") ?? "";
+            Console.WriteLine($"MONOLITH_URL={_monolithServiceURL}");
+
+            var _moviesServiceURL = Configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "";
+            Console.WriteLine($"MOVIES_SERVICE_URL={_moviesServiceURL}");
+
+            var _eventsServiceURL = Configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "";
+            Console.WriteLine($"EVENTS_SERVICE_URL={_eventsServiceURL}");
+
+            var _gradualMigration = Configuration.GetValue<bool>("GRADUAL_MIGRATION");
+            Console.WriteLine($"GRADUAL_MIGRATION={_gradualMigration}");
+
+            var _moviesMigrationPercent = Configuration.GetValue<string>("MOVIES_MIGRATION_PERCENT") ?? "";
+            Console.WriteLine($"MOVIES_MIGRATION_PERCENT={_moviesMigrationPercent}");
         }
 
         public IConfiguration Configuration { get; }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var _moviesServiceURL = Configuration.GetValue<string>("URLs:movies-service") ?? "";
-            var _monolithURL = Configuration.GetValue<string>("URLs:monolith") ?? "";
-            var _eventsServiceURL = Configuration.GetValue<string>("URLs:events-service") ?? "";
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
