@@ -160,3 +160,4 @@ src/microservices/events/.vs/
 src/microservices/events/src/.vs/
 src/microservices/proxy/src/.vs/
 src/microservices/proxy/src/obj/
+.vs/
