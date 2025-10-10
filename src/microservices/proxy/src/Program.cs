@@ -21,6 +21,7 @@ namespace proxy
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseUrls($"http://0.0.0.0:8000");
                     webBuilder.UseStartup<Startup>();
                 })
             .ConfigureServices((services) =>
@@ -65,7 +66,6 @@ namespace proxy
                     featureFlagsSection.Add("MoviesPercentageFilter", moviesPercentageFilter);
 
                     configuration["FeatureFlags"] = featureFlagsSection.ToString();
-                    configuration["urls"] = $"http://0.0.0.0:{_port}";
 
                     services.AddFeatureManagement(configuration.GetSection("FeatureFlags"))
                             .AddFeatureFilter<PercentageFilter>()

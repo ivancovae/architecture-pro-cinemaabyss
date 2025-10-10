@@ -11,28 +11,24 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables();
-
-        IConfiguration configuration = new ConfigurationBuilder()
-                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                        .AddEnvironmentVariables()
-                        .Build();
+            .AddEnvironmentVariables()
+            .Build();
 
         Console.WriteLine("---=== Parameters StartUp ===---");
-        var _port = configuration.GetValue<string>("PORT") ?? "";
+        var _port = builder.Configuration.GetValue<string>("PORT") ?? "";
         Console.WriteLine($"PORT={_port}");
-
-        var _kafkaBrokers = configuration.GetValue<string>("KAFKA_BROKERS") ?? "";
+        
+        var _kafkaBrokers = builder.Configuration.GetValue<string>("KAFKA_BROKERS") ?? "";
         Console.WriteLine($"KAFKA_BROKERS={_kafkaBrokers}");
 
         var jbootstrapServers = new JObject();
         jbootstrapServers.Add("BootstrapServers", _kafkaBrokers);
-        configuration["Kafka"] = jbootstrapServers.ToString();
-        configuration["urls"] = $"http://0.0.0.0:{_port}";
+        builder.Configuration["Kafka"] = jbootstrapServers.ToString();
+        builder.Configuration["urls"] = $"http://0.0.0.0:8082";
 
         var bootstrapServers = builder.Configuration.GetValue<string>("Kafka:BootstrapServers") ?? "";
         builder.Services.AddSingleton<IKafkaProducerService>(new KafkaProducerService(bootstrapServers));
-
+        
         builder.Services.AddHostedService(service =>
                 new KafkaConsumerService(
                     service.GetRequiredService<ILogger<KafkaConsumerService>>(),

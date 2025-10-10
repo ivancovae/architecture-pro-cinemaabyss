@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -24,9 +25,15 @@ namespace proxy.Controllers
             _logger = logger;
             _configuration = configuration;
 
-            _moviesServiceURL = _configuration.GetValue<string>("URLs:movies-service") ?? "";
-            _monolithURL = _configuration.GetValue<string>("URLs:monolith") ?? "";
-            _eventsServiceURL = _configuration.GetValue<string>("URLs:events-service") ?? "";
+            _moviesServiceURL = _configuration.GetValue<string>("URLs:movies-service") ?? "http://localhost:8081";
+            _monolithURL = _configuration.GetValue<string>("URLs:monolith") ?? "http://localhost:8080";
+            _eventsServiceURL = _configuration.GetValue<string>("URLs:events-service") ?? "http://localhost:8082";
+        }
+
+        [Route("about")]
+        public IResult Get()
+        {
+            return Results.Ok("Proxy server");
         }
 
         [Route("health")]
@@ -34,7 +41,8 @@ namespace proxy.Controllers
         {
             var apiPath = "health/";
             var client = new HttpClient();
-            return await client.GetAsync($"{_monolithURL}/{apiPath}");
+            client.BaseAddress = new System.Uri(_monolithURL);
+            return await client.GetAsync($"/{apiPath}");
         }
         [HttpGet(Name = "api/movies")]
         [Route("api/movies")]
@@ -42,15 +50,16 @@ namespace proxy.Controllers
         public async Task<HttpResponseMessage> GetMovies(IFeatureManager _featureManager)
         {
             var apiPath = "api/movies/";
+            var client = new HttpClient();
             var newAlgorithm = await _featureManager.IsEnabledAsync("MoviesPercentageFilter");
             if (newAlgorithm)
             {
-                var clientNew = new HttpClient();
-                return await clientNew.GetAsync($"{_moviesServiceURL}/{apiPath}");
+                client.BaseAddress = new System.Uri(_moviesServiceURL);
+                return await client.GetAsync($"/{apiPath}");
             }
 
-            var client = new HttpClient();
-            return await client.GetAsync($"{_monolithURL}/{apiPath}");
+            client.BaseAddress = new System.Uri(_monolithURL);
+            return await client.GetAsync($"/{apiPath}");
         }
         [HttpGet(Name = "api/users")]
         [Route("api/users")]
@@ -58,6 +67,7 @@ namespace proxy.Controllers
         {
             var apiPath = "api/users/";
             var client = new HttpClient();
+            client.BaseAddress = new System.Uri(_monolithURL);
             return await client.GetAsync($"{_monolithURL}/{apiPath}");
         }
         [HttpGet(Name = "api/payments")]
@@ -66,6 +76,7 @@ namespace proxy.Controllers
         {
             var apiPath = "api/payments/";
             var client = new HttpClient();
+            client.BaseAddress = new System.Uri(_monolithURL);
             return await client.GetAsync($"{_monolithURL}/{apiPath}");
         }
         [HttpGet(Name = "api/subscriptions")]
@@ -74,6 +85,7 @@ namespace proxy.Controllers
         {
             var apiPath = "api/subscriptions/";
             var client = new HttpClient();
+            client.BaseAddress = new System.Uri(_monolithURL);
             return await client.GetAsync($"{_monolithURL}/{apiPath}");
         }
         [HttpGet(Name = "api/events")]
@@ -82,7 +94,8 @@ namespace proxy.Controllers
         {
             var apiPath = "api/events/";
             var client = new HttpClient();
-            return await client.GetAsync($"{_eventsServiceURL}/{apiPath}");
+            client.BaseAddress = new System.Uri(_eventsServiceURL);
+            return await client.GetAsync($"/{apiPath}");
         }
     }
 }
