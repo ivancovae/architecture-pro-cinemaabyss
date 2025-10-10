@@ -1,11 +1,11 @@
-using Confluent.Kafka;
+
 using events.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace events.Controllers
 {
     [ApiController]
-    [Route("api")]
     public class EventsController : ControllerBase
     {
         private readonly IKafkaProducerService _producerService;
@@ -21,46 +21,34 @@ namespace events.Controllers
             _producerService = producerService;
         }
 
-        [HttpGet("/about")]
-        [Route("/about")]
-        public IActionResult GetAbout()
+        [HttpGet("/api/events/health")]
+        [Route("/api/events/health")]
+        public IActionResult GetHealth()
         {
             return Ok($"Event Service");
         }
 
-        [HttpPost("/user")]
-        [Route("/user")]
-        public async Task<IActionResult> SendMessageUser([FromQuery] string message)
+        [HttpPost("/api/events/user")]
+        [Route("/api/events/user")]
+        public async Task<IActionResult> SendMessageUser([FromBody] JObject json)
         {
-            if (string.IsNullOrEmpty(message))
-            {
-                return BadRequest("'message' query parameters are required.");
-            }
-            await _producerService.SendMessageAsync(_eventTopicUser, message);
-            return Ok($"Message '{message}' sent successfully to topic '{_eventTopicUser}'.");
+            await _producerService.SendMessageAsync(_eventTopicUser, $"{json.ToString()}");
+            return Ok($"Message '{json.GetValue("user_id")}' sent successfully to topic '{_eventTopicUser}'.");
         }
 
-        [HttpPost("/payment")]
-        [Route("/payment")]
-        public async Task<IActionResult> SendMessagePayment([FromQuery] string message)
+        [HttpPost("/api/events/payment")]
+        [Route("/api/events/payment")]
+        public async Task<IActionResult> SendMessagePayment([FromBody] JObject json)
         {
-            if (string.IsNullOrEmpty(message))
-            {
-                return BadRequest("'message' query parameters are required.");
-            }
-            await _producerService.SendMessageAsync(_eventTopicPayment, message);
-            return Ok($"Message '{message}' sent successfully to topic '{_eventTopicPayment}'.");
+            await _producerService.SendMessageAsync(_eventTopicPayment, $"{json.ToString()}");
+            return Ok($"Message '{json.GetValue("payment_id")}' sent successfully to topic '{_eventTopicPayment}'.");
         }
-        [HttpPost("/movie")]
-        [Route("/movie")]
-        public async Task<IActionResult> SendMessageMovie([FromQuery] string message)
+        [HttpPost("/api/events/movie")]
+        [Route("/api/events/movie")]
+        public async Task<IActionResult> SendMessageMovie([FromBody] JObject json)
         {
-            if (string.IsNullOrEmpty(message))
-            {
-                return BadRequest("'message' query parameters are required.");
-            }
-            await _producerService.SendMessageAsync(_eventTopicMovie, message);
-            return Ok($"Message '{message}' sent successfully to topic '{_eventTopicMovie}'.");
+            await _producerService.SendMessageAsync(_eventTopicMovie, $"{json.ToString()}");
+            return Ok($"Message '{json.GetValue("movie_id")}' sent successfully to topic '{_eventTopicMovie}'.");
         }
     }
 }

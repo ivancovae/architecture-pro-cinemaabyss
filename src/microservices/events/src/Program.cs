@@ -1,8 +1,6 @@
 using events.Services;
 using events.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using System.Reflection.PortableExecutable;
 
 public class Program
 {
@@ -11,34 +9,27 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .Build();
+            .AddEnvironmentVariables();
 
-        Console.WriteLine("---=== Parameters StartUp ===---");
-        var _port = builder.Configuration.GetValue<string>("PORT") ?? "";
-        Console.WriteLine($"PORT={_port}");
-        
-        var _kafkaBrokers = builder.Configuration.GetValue<string>("KAFKA_BROKERS") ?? "";
-        Console.WriteLine($"KAFKA_BROKERS={_kafkaBrokers}");
+        var _port = builder.Configuration.GetValue<string>("PORT") ?? "8082";
+        var _kafkaBrokers = builder.Configuration.GetValue<string>("KAFKA_BROKERS") ?? "localhost:9092";
 
         var jbootstrapServers = new JObject();
         jbootstrapServers.Add("BootstrapServers", _kafkaBrokers);
         builder.Configuration["Kafka"] = jbootstrapServers.ToString();
-        builder.Configuration["urls"] = $"http://0.0.0.0:8082";
 
-        var bootstrapServers = builder.Configuration.GetValue<string>("Kafka:BootstrapServers") ?? "";
-        builder.Services.AddSingleton<IKafkaProducerService>(new KafkaProducerService(bootstrapServers));
+        var bootstrapServers = builder.Configuration.GetValue<string>("Kafka:BootstrapServers") ?? "localhost:9092";
+        /*builder.Services.AddSingleton<IKafkaProducerService>(new KafkaProducerService(bootstrapServers));*/
         
-        builder.Services.AddHostedService(service =>
+        /*builder.Services.AddHostedService(service =>
                 new KafkaConsumerService(
                     service.GetRequiredService<ILogger<KafkaConsumerService>>(),
                     service.GetRequiredService<IHostApplicationLifetime>(),
                     bootstrapServers
-                ));
-        builder.Services.AddControllers();
+                ));*/
+        builder.Services.AddControllers().AddNewtonsoftJson();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
         var app = builder.Build();
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -46,6 +37,7 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        app.UseRouting();
 
         app.UseAuthorization();
 

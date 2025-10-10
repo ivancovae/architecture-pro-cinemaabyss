@@ -11,9 +11,12 @@ namespace events.Services
         {
             var config = new ProducerConfig
             {
-                BootstrapServers = bootstrapServers
+                BootstrapServers = bootstrapServers,
+                ClientId = "kafka-producer"
             };
-            _producer = new ProducerBuilder<Null, string>(config).Build();
+            var builder = new ProducerBuilder<Null, string>(config);
+
+            _producer = builder.Build();
         }
 
         public async Task SendMessageAsync(string topic, string message)
@@ -23,9 +26,9 @@ namespace events.Services
                 await _producer.ProduceAsync(topic, new Message<Null, string> { Value = message });
                 Console.WriteLine($"Message '{message}' sent to topic '{topic}'.");
             }
-            catch (Exception ex)
+            catch (ProduceException<Null, string> e)
             {
-                Console.WriteLine($"Error sending message to Kafka: {ex.Message}");
+                Console.WriteLine($"Delivery failed: {e.Error.Reason}");
                 throw;
             }
         }
