@@ -33,9 +33,9 @@ def delivery_report(err, msg):
         print(f'Сообщение доставлено в {msg.topic()} [{msg.partition()}]')
     
 @app.get("/api/events/health")
-def get_about():
-    html_content = "Events Service"
-    return HTMLResponse(content=html_content)
+def get_health():
+    json_data = jsonable_encoder({"status":"true"})
+    return JSONResponse(content=json_data)
 
 @app.post("/api/events/user")
 def post_events_user(data  = Body()):
@@ -48,7 +48,7 @@ def post_events_user(data  = Body()):
     print(f"Sent: {message.decode()}", flush=True)
     print(f'Message {data["user_id"]}')
     json_data = jsonable_encoder(data)
-    return JSONResponse(content=json_data)
+    return JSONResponse(content=json_data, status_code=201)
 
 @app.post("/api/events/payment")
 def post_events_payment(data  = Body()):
@@ -61,7 +61,7 @@ def post_events_payment(data  = Body()):
     print(f"Sent: {message.decode()}", flush=True)
     print(f'Message {data["payment_id"]}')
     json_data = jsonable_encoder(data)
-    return JSONResponse(content=json_data)
+    return JSONResponse(content=json_data, status_code=201)
 
 @app.post("/api/events/movie")
 def post_events_movie(data  = Body()):
@@ -74,4 +74,4 @@ def post_events_movie(data  = Body()):
     print(f"Sent: {message.decode()}", flush=True)
     print(f'Message {data["movie_id"]}')
     json_data = jsonable_encoder(data)
-    return JSONResponse(content=json_data)
+    return JSONResponse(content=json_data, status_code=201)

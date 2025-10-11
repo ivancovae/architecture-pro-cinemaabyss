@@ -10,6 +10,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace proxy.Controllers
@@ -103,8 +104,8 @@ namespace proxy.Controllers
             httpClient.BaseAddress = new Uri(moviesServiceURL);
             var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
-            
-            return Results.Json(responseBody);
+            JArray array = JArray.Parse(responseBody);
+            return Results.Json(array.ToString());
         }
         [HttpPost]
         [Route("/api/users")]
@@ -121,15 +122,16 @@ namespace proxy.Controllers
         }
         [HttpGet]
         [Route("/api/payments")]
-        public async Task<IResult> GetPayments()
+        public async Task<IResult> GetPayments([FromQuery]int user_id)
         {
             var apiPath = "/api/payments";
             var httpClient = _httpClientFactory?.CreateClient();
             var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
             httpClient.BaseAddress = new Uri(moviesServiceURL);
-            var response = await httpClient.GetAsync($"{apiPath}");
+            var response = await httpClient.GetAsync($"{apiPath}?user_id={user_id}");
             var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            JArray array = JArray.Parse(responseBody);
+            return Results.Json(array.ToString());
         }
         [HttpPost]
         [Route("/api/payments")]
@@ -146,15 +148,16 @@ namespace proxy.Controllers
         }
         [HttpGet]
         [Route("/api/subscriptions")]
-        public async Task<IResult> GetSubscriptions()
+        public async Task<IResult> GetSubscriptions([FromQuery] int user_id)
         {
             var apiPath = "/api/subscriptions";
             var httpClient = _httpClientFactory?.CreateClient();
             var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
             httpClient.BaseAddress = new Uri(moviesServiceURL);
-            var response = await httpClient.GetAsync($"{apiPath}");
+            var response = await httpClient.GetAsync($"{apiPath}?user_id={user_id}");
             var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            JArray array = JArray.Parse(responseBody);
+            return Results.Json(array.ToString());
         }
         [HttpPost]
         [Route("/api/subscriptions")]
@@ -196,7 +199,8 @@ namespace proxy.Controllers
             httpClient.BaseAddress = new Uri(moviesServiceURL);
             var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            JObject objBody = JObject.Parse(responseBody);
+            return Results.Json(objBody);
         }
         [HttpPost(Name = "api/events/payment")]
         [Route("/api/events/payment")]
@@ -209,7 +213,8 @@ namespace proxy.Controllers
             httpClient.BaseAddress = new Uri(moviesServiceURL);
             var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            JObject objBody = JObject.Parse(responseBody);
+            return Results.Json(objBody);
         }
         [HttpPost(Name = "/api/events/user")]
         [Route("/api/events/user")]
@@ -224,7 +229,8 @@ namespace proxy.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                return Results.Json(responseBody);
+                JObject objBody = JObject.Parse(responseBody);
+                return Results.Json(objBody);
             }
             return Results.Problem();
         }
