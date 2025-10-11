@@ -34,7 +34,7 @@ def delivery_report(err, msg):
     
 @app.get("/api/events/health")
 def get_health():
-    json_data = jsonable_encoder({"status":"true"})
+    json_data = jsonable_encoder({"status":True})
     return JSONResponse(content=json_data)
 
 @app.post("/api/events/user")
@@ -56,7 +56,9 @@ def post_events_payment(data  = Body()):
     topic = "payment-events"
     producer = KafkaProducer(bootstrap_servers=kafkaUrl)
     message = f'Message {data["payment_id"]}'.encode()
-    producer.send(topic, message)
+    future = producer.send(topic, message)
+    result = future.get(timeout=60)
+    print(result)
     producer.flush()
     print(f"Sent: {message.decode()}", flush=True)
     print(f'Message {data["payment_id"]}')

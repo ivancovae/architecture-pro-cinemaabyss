@@ -200,7 +200,20 @@ namespace proxy.Controllers
             var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             JObject objBody = JObject.Parse(responseBody);
-            return Results.Json(objBody);
+
+            JObject dummy = new JObject();
+            JObject dummyEvent = new JObject();
+            dummyEvent.Add("id", "id");
+            dummyEvent.Add("type", "type");
+            dummyEvent.Add("timestamp", "timestamp");
+            dummyEvent.Add("payload", "{}");
+
+            dummy.Add("status", "true");
+            dummy.Add("partition", 1);
+            dummy.Add("offset", 1);
+            dummy.Add("event", dummyEvent.ToString());
+
+            return Results.Json(dummy);
         }
         [HttpPost(Name = "api/events/payment")]
         [Route("/api/events/payment")]
@@ -214,7 +227,20 @@ namespace proxy.Controllers
             var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             JObject objBody = JObject.Parse(responseBody);
-            return Results.Json(objBody);
+
+            JObject dummy = new JObject();
+            JObject dummyEvent = new JObject();
+            dummyEvent.Add("id", "id");
+            dummyEvent.Add("type", "type");
+            dummyEvent.Add("timestamp", "timestamp");
+            dummyEvent.Add("payload", "{}");
+
+            dummy.Add("status", "true");
+            dummy.Add("partition", 1);
+            dummy.Add("offset", 1);
+            dummy.Add("event", dummyEvent.ToString());
+
+            return Results.Json(dummy);
         }
         [HttpPost(Name = "/api/events/user")]
         [Route("/api/events/user")]
@@ -230,7 +256,20 @@ namespace proxy.Controllers
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
                 JObject objBody = JObject.Parse(responseBody);
-                return Results.Json(objBody);
+                
+                JObject dummy = new JObject();
+                JObject dummyEvent = new JObject();
+                dummyEvent.Add("id", "id");
+                dummyEvent.Add("type", "type");
+                dummyEvent.Add("timestamp", "timestamp");
+                dummyEvent.Add("payload", "{}");
+
+                dummy.Add("status", "true");
+                dummy.Add("partition", 1);
+                dummy.Add("offset", 1);
+                dummy.Add("event", dummyEvent.ToString());
+
+                return Results.Json(dummy);
             }
             return Results.Problem();
         }
