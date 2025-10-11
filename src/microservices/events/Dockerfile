@@ -1,17 +1,13 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /src
+FROM python:3.14-slim
 
-COPY ./src/*.csproj .
-RUN dotnet restore
-
-COPY . .
-RUN dotnet publish ./src/events.csproj -c release -o /app
-
-# final stage image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
-COPY --from=build /app .
 
-EXPOSE ${SERVER_PORT}
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT [ "dotnet", "events.dll" ]
+COPY main.py .
+COPY config.env .
+
+EXPOSE ${PORT}
+
+CMD uvicorn main:app "--host" "0.0.0.0" "--port" ${PORT} "--env-file" "/app/config.env"

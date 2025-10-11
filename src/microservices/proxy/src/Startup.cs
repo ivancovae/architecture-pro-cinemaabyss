@@ -78,12 +78,12 @@ namespace proxy
                 });
             }
             app.UseRouting();
-
+            
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-
+             
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

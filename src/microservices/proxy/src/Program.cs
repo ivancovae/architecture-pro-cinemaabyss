@@ -21,15 +21,15 @@ namespace proxy
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseUrls($"http://0.0.0.0:8000");
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://0.0.0.0:8000");
                 })
             .ConfigureServices((builder, services) =>
                 {
                     services.AddFeatureManagement(builder.Configuration.GetSection("FeatureFlags"))
                             .AddFeatureFilter<PercentageFilter>()
                             .AddFeatureFilter<TimeWindowFilter>();
-
+                    services.AddHttpClient();
                     services.AddControllers().AddNewtonsoftJson();
                     services.AddEndpointsApiExplorer();
                     services.AddSwaggerGen();

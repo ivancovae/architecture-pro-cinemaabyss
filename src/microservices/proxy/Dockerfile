@@ -13,5 +13,6 @@ WORKDIR /app
 COPY --from=build /app .
 
 EXPOSE ${SERVER_PORT}
+ENV ASPNETCORE_URLS=http://+:${SERVER_PORT}
 
 ENTRYPOINT [ "dotnet", "proxy.dll" ]

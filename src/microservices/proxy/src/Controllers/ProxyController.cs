@@ -25,29 +25,35 @@ namespace proxy.Controllers
         private string _monolithURL;
         private string _eventsServiceURL;
 
-        public ProxyController(IConfiguration configuration, ILogger<ProxyController> logger)
+        IHttpClientFactory _httpClientFactory;
+
+        public ProxyController(IHttpClientFactory httpClientFactory,  IConfiguration configuration, ILogger<ProxyController> logger)
         {
             _logger = logger;
-            _configuration = configuration;
+            _configuration = configuration; 
+            _httpClientFactory = httpClientFactory;
 
-            _moviesServiceURL = _configuration.GetValue<string>("URLs:movies-service") ?? "http://localhost:8081";
-            _monolithURL = _configuration.GetValue<string>("URLs:monolith") ?? "http://localhost:8080";
-            _eventsServiceURL = _configuration.GetValue<string>("URLs:events-service") ?? "http://localhost:8082";
+            _moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            _monolithURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "http://localhost:8080";
+            _eventsServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "http://localhost:8082";
         }
 
         [Route("/about")]
-        public IResult Get()
+        public IResult Getabout()
         {
             return Results.Ok("Proxy server");
         }
 
         [Route("/health")]
-        public async Task<HttpResponseMessage> Get(IFeatureManager _featureManager)
+        public async Task<IResult> Get()
         {
             var apiPath = "/health";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_monolithURL);
-            return await client.GetAsync($"{apiPath}");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.GetAsync($"{apiPath}");
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return Results.Json(responseBody);
         }
         [HttpGet(Name = "/api/movies")]
         [Route("/api/movies")]
@@ -57,63 +63,121 @@ namespace proxy.Controllers
             var apiPath = "/api/movies";
             var _moviesServiceURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "";
             Console.WriteLine($"MOVIES_SERVICE_URL={_moviesServiceURL}");
-
-            var client = new HttpClient();
             var newAlgorithm = await _featureManager.IsEnabledAsync("MoviesPercentageFilter");
             if (newAlgorithm)
             {
-                client.BaseAddress = new System.Uri(_moviesServiceURL);
-                var responseNew = await client.GetAsync($"{apiPath}");
+                var httpClientNew = _httpClientFactory?.CreateClient();
+                var newMoviesServiceURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "http://localhost:8081";
+                httpClientNew.BaseAddress = new Uri(newMoviesServiceURL);
+                var responseNew = await httpClientNew.GetAsync($"{apiPath}");
                 var responseNewBody = await responseNew.Content.ReadAsStringAsync();
                 return Results.Json(responseNewBody);
             }
-
-            client.BaseAddress = new System.Uri(_monolithURL);
-            var response = await client.GetAsync($"{apiPath}");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
             return Results.Json(responseBody);
         }
-        [HttpGet(Name = "/api/users")]
+        [HttpGet(Name = "/api/movies/health")]
+        [Route("/api/movies/health")]
+        [FeatureGate("Movies")]
+        public async Task<IResult> GetMoviesHealth(IFeatureManager _featureManager)
+        {
+            var apiPath = "/api/movies/health";
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.GetAsync($"{apiPath}");
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return Results.Json(responseBody);
+        }
+        [HttpGet]
         [Route("/api/users")]
-        public async Task<IResult> GetUsers(IFeatureManager _featureManager)
+        public async Task<IResult> GetUsers()
         {
             var apiPath = "/api/users";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_monolithURL);
-            var response = await client.GetAsync($"{apiPath}");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.GetAsync($"{apiPath}");
+            var responseBody = await response.Content.ReadAsStringAsync();
+            
+            return Results.Json(responseBody);
+        }
+        [HttpPost]
+        [Route("/api/users")]
+        public async Task<IResult> PostUsers([FromBody] JObject json)
+        {
+            var apiPath = "/api/users";
+            var httpContent = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             return Results.Json(responseBody);
         }
-        [HttpGet(Name = "/api/payments")]
+        [HttpGet]
         [Route("/api/payments")]
-        public async Task<IResult> GetPayments(IFeatureManager _featureManager)
+        public async Task<IResult> GetPayments()
         {
             var apiPath = "/api/payments";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_monolithURL);
-            var response = await client.GetAsync($"{apiPath}");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
             return Results.Json(responseBody);
         }
-        [HttpGet(Name = "/api/subscriptions")]
+        [HttpPost]
+        [Route("/api/payments")]
+        public async Task<IResult> PostPayments([FromBody] JObject json)
+        {
+            var apiPath = "/api/payments";
+            var httpContent = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.PostAsync($"{apiPath}", httpContent);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return Results.Json(responseBody);
+        }
+        [HttpGet]
         [Route("/api/subscriptions")]
-        public async Task<IResult> GetSubscriptions(IFeatureManager _featureManager)
+        public async Task<IResult> GetSubscriptions()
         {
             var apiPath = "/api/subscriptions";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_monolithURL);
-            var response = await client.GetAsync($"{apiPath}");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
             return Results.Json(responseBody);
         }
-        [HttpGet(Name = "/api/events/health")]
+        [HttpPost]
+        [Route("/api/subscriptions")]
+        public async Task<IResult> PostSubscriptions([FromBody] JObject json)
+        {
+            var apiPath = "/api/subscriptions";
+            var httpContent = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.PostAsync($"{apiPath}", httpContent);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return Results.Json(responseBody);
+        }
+        [HttpGet]
         [Route("/api/events/health")]
-        public async Task<IResult> PostEvents(IFeatureManager _featureManager)
+        public async Task<IResult> PostEvents()
         {
             var apiPath = "/api/events/health";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_eventsServiceURL);
-            var response = await client.GetAsync($"{apiPath}");
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.GetAsync($"{apiPath}");
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
@@ -123,25 +187,27 @@ namespace proxy.Controllers
         }
         [HttpPost(Name = "/api/events/movie")]
         [Route("/api/events/movie")]
-        public async Task<IResult> PostEventsMovie(IFeatureManager _featureManager, [FromBody] JObject json)
+        public async Task<IResult> PostEventsMovie([FromBody] JObject json)
         {
             var apiPath = "/api/events/movie";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_eventsServiceURL);
             var httpContent = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{apiPath}", httpContent);
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             return Results.Json(responseBody);
         }
         [HttpPost(Name = "api/events/payment")]
         [Route("/api/events/payment")]
-        public async Task<IResult> PostEventsPayment(IFeatureManager _featureManager, [FromBody] JObject json)
+        public async Task<IResult> PostEventsPayment([FromBody] JObject json)
         {
             var apiPath = "/api/events/payment";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_eventsServiceURL);
             var httpContent = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{apiPath}", httpContent);
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             return Results.Json(responseBody);
         }
@@ -150,10 +216,11 @@ namespace proxy.Controllers
         public async Task<IResult> PostEventsUser([FromBody] JObject json)
         {
             var apiPath = "/api/events/user";
-            var client = new HttpClient();
-            client.BaseAddress = new System.Uri(_eventsServiceURL);
             var httpContent = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{apiPath}", httpContent);
+            var httpClient = _httpClientFactory?.CreateClient();
+            var moviesServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "http://localhost:8081";
+            httpClient.BaseAddress = new Uri(moviesServiceURL);
+            var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
