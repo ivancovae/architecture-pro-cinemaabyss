@@ -105,7 +105,7 @@ namespace proxy.Controllers
             var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
             JArray array = JArray.Parse(responseBody);
-            return Results.Json(array.ToString());
+            return Results.Json(array);
         }
         [HttpPost]
         [Route("/api/users")]
@@ -131,7 +131,7 @@ namespace proxy.Controllers
             var response = await httpClient.GetAsync($"{apiPath}?user_id={user_id}");
             var responseBody = await response.Content.ReadAsStringAsync();
             JArray array = JArray.Parse(responseBody);
-            return Results.Json(array.ToString());
+            return Results.Json(array);
         }
         [HttpPost]
         [Route("/api/payments")]
@@ -157,7 +157,7 @@ namespace proxy.Controllers
             var response = await httpClient.GetAsync($"{apiPath}?user_id={user_id}");
             var responseBody = await response.Content.ReadAsStringAsync();
             JArray array = JArray.Parse(responseBody);
-            return Results.Json(array.ToString());
+            return Results.Json(array);
         }
         [HttpPost]
         [Route("/api/subscriptions")]
