@@ -210,7 +210,7 @@ namespace proxy.Controllers
             dummyEvent.Add("timestamp", "timestamp");
             dummyEvent.Add("payload", "{}");
 
-            dummy.Add("status", "success");
+            dummy.Add("status", "true");
             dummy.Add("partition", 1);
             dummy.Add("offset", 1);
             dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
@@ -237,7 +237,7 @@ namespace proxy.Controllers
             dummyEvent.Add("timestamp", "timestamp");
             dummyEvent.Add("payload", "{}");
 
-            dummy.Add("status", "success");
+            dummy.Add("status", "true");
             dummy.Add("partition", 1);
             dummy.Add("offset", 1);
             dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
@@ -266,7 +266,7 @@ namespace proxy.Controllers
                 dummyEvent.Add("timestamp", "timestamp");
                 dummyEvent.Add("payload", "{}");
 
-                dummy.Add("status", "success");
+                dummy.Add("status", "true");
                 dummy.Add("partition", 1);
                 dummy.Add("offset", 1);
                 dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
