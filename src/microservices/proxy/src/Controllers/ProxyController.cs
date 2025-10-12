@@ -73,7 +73,7 @@ namespace proxy.Controllers
                 var responseNew = await httpClientNew.GetAsync($"{apiPath}");
                 var responseNewBody = await responseNew.Content.ReadAsStringAsync();
                 JArray arrayNew = JArray.Parse(responseNewBody);
-                return Results.Json(arrayNew.ToString(Newtonsoft.Json.Formatting.None));
+                return Results.Text(arrayNew.ToString(Newtonsoft.Json.Formatting.None), "application/json");
             }
             var httpClient = _httpClientFactory?.CreateClient();
             var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
@@ -81,7 +81,7 @@ namespace proxy.Controllers
             var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
             JArray array = JArray.Parse(responseBody);
-            return Results.Json(array.ToString(Newtonsoft.Json.Formatting.None));
+            return Results.Text(array.ToString(Newtonsoft.Json.Formatting.None), "application/json");
         }
         [HttpGet(Name = "/api/movies/health")]
         [Route("/api/movies/health")]
@@ -107,7 +107,7 @@ namespace proxy.Controllers
             var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
             JArray array = JArray.Parse(responseBody);
-            return Results.Json(array.ToString(Newtonsoft.Json.Formatting.None));
+            return Results.Text(array.ToString(Newtonsoft.Json.Formatting.None), "application/json");
         }
         [HttpPost]
         [Route("/api/users")]
