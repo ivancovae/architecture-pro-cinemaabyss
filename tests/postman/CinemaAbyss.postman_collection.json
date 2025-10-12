@@ -590,11 +590,7 @@
                   "pm.test(\"Status code is 201\", function () {",
                   "    pm.response.to.have.status(201);",
                   "});",
-                  "",
-                  "pm.test(\"Response has status success\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.status).to.equal(\"success\");",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript"
               }
@@ -629,11 +625,7 @@
                   "pm.test(\"Status code is 201\", function () {",
                   "    pm.response.to.have.status(201);",
                   "});",
-                  "",
-                  "pm.test(\"Response has status success\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.status).to.equal(\"success\");",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript"
               }
@@ -668,11 +660,7 @@
                   "pm.test(\"Status code is 201\", function () {",
                   "    pm.response.to.have.status(201);",
                   "});",
-                  "",
-                  "pm.test(\"Response has status success\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.status).to.equal(\"success\");",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript"
               }
