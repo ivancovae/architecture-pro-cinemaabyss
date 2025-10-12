@@ -215,7 +215,7 @@ namespace proxy.Controllers
             dummy.Add("offset", 1);
             dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
 
-            return Results.Json(dummy.ToString(Newtonsoft.Json.Formatting.None));
+            return Results.Text(dummy.ToString(Newtonsoft.Json.Formatting.None), "application/json");
         }
         [HttpPost(Name = "api/events/payment")]
         [Route("/api/events/payment")]
@@ -242,7 +242,7 @@ namespace proxy.Controllers
             dummy.Add("offset", 1);
             dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
 
-            return Results.Json(dummy.ToString(Newtonsoft.Json.Formatting.None));
+            return Results.Text(dummy.ToString(Newtonsoft.Json.Formatting.None), "application/json");
         }
         [HttpPost(Name = "/api/events/user")]
         [Route("/api/events/user")]
@@ -271,7 +271,7 @@ namespace proxy.Controllers
                 dummy.Add("offset", 1);
                 dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
 
-                return Results.Json(dummy.ToString(Newtonsoft.Json.Formatting.None));
+                return Results.Text(dummy.ToString(Newtonsoft.Json.Formatting.None), "application/json");
             }
             return Results.Problem();
         }
