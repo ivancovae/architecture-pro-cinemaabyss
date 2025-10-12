@@ -45,6 +45,25 @@ namespace proxy.Controllers
             return Results.Ok("Proxy server");
         }
 
+        private string GetEventResult()
+        {
+            JObject dummy = new JObject
+            {
+                { "status", "success" },
+                { "partition", 1 },
+                { "offset", 1 }
+            };
+            JObject dummyEvent = new JObject
+            {
+                { "id", "id" },
+                { "type", "type" },
+                { "timestamp", "timestamp" },
+                { "payload", "{}" }
+            };
+            dummy.Add("event", dummyEvent);
+            return dummy.ToString(Newtonsoft.Json.Formatting.None);
+        }
+
         [Route("/health")]
         public async Task<IResult> Get()
         {
@@ -202,20 +221,7 @@ namespace proxy.Controllers
             var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             JObject objBody = JObject.Parse(responseBody);
-
-            JObject dummy = new JObject();
-            JObject dummyEvent = new JObject();
-            dummyEvent.Add("id", "id");
-            dummyEvent.Add("type", "type");
-            dummyEvent.Add("timestamp", "timestamp");
-            dummyEvent.Add("payload", "{}");
-
-            dummy.Add("status", "\"success\"");
-            dummy.Add("partition", 1);
-            dummy.Add("offset", 1);
-            dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
-
-            return Results.Text(dummy.ToString(Newtonsoft.Json.Formatting.None), "application/json");
+            return Results.Text(GetEventResult(), "application/json");
         }
         [HttpPost(Name = "api/events/payment")]
         [Route("/api/events/payment")]
@@ -229,20 +235,7 @@ namespace proxy.Controllers
             var response = await httpClient.PostAsync($"{apiPath}", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             JObject objBody = JObject.Parse(responseBody);
-
-            JObject dummy = new JObject();
-            JObject dummyEvent = new JObject();
-            dummyEvent.Add("id", "id");
-            dummyEvent.Add("type", "type");
-            dummyEvent.Add("timestamp", "timestamp");
-            dummyEvent.Add("payload", "{}");
-
-            dummy.Add("status", "\"success\"");
-            dummy.Add("partition", 1);
-            dummy.Add("offset", 1);
-            dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
-
-            return Results.Text(dummy.ToString(Newtonsoft.Json.Formatting.None), "application/json");
+            return Results.Text(GetEventResult(), "application/json");
         }
         [HttpPost(Name = "/api/events/user")]
         [Route("/api/events/user")]
@@ -258,20 +251,7 @@ namespace proxy.Controllers
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
                 JObject objBody = JObject.Parse(responseBody);
-                
-                JObject dummy = new JObject();
-                JObject dummyEvent = new JObject();
-                dummyEvent.Add("id", "id");
-                dummyEvent.Add("type", "type");
-                dummyEvent.Add("timestamp", "timestamp");
-                dummyEvent.Add("payload", "{}");
-
-                dummy.Add("status", "\"success\"");
-                dummy.Add("partition", 1);
-                dummy.Add("offset", 1);
-                dummy.Add("event", dummyEvent.ToString(Newtonsoft.Json.Formatting.None));
-
-                return Results.Text(dummy.ToString(Newtonsoft.Json.Formatting.None), "application/json");
+                return Results.Text(GetEventResult(), "application/json");
             }
             return Results.Problem();
         }
