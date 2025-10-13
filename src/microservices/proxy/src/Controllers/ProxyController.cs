@@ -65,15 +65,10 @@ namespace proxy.Controllers
         }
 
         [Route("/health")]
-        public async Task<IResult> Get()
+        public IResult Get()
         {
-            var apiPath = "/health";
-            var httpClient = _httpClientFactory?.CreateClient();
-            var moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
-            httpClient.BaseAddress = new Uri(moviesServiceURL);
-            var response = await httpClient.GetAsync($"{apiPath}");
-            var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            var JSuccess = new JObject() { { "status", true} };
+            return Results.Json(JSuccess);
         }
         [HttpGet(Name = "/api/movies")]
         [Route("/api/movies")]
