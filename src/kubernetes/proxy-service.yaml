@@ -46,7 +46,7 @@ spec:
               path: /health
               port: 8000
             initialDelaySeconds: 60
-            periodSeconds: 10
+            periodSeconds: 20
           livenessProbe:
             httpGet:
               path: /health
