@@ -93,7 +93,7 @@ namespace proxy.Controllers
                 if (id != null)
                 {
                     var responseMovie = await responseNew.Content.ReadFromJsonAsync<MovieInput>();
-                    return Results.Json(responseMovie, statusCode: 201);
+                    return Results.Json(responseMovie, statusCode: 200);
                 }
                 var responseNewMovies = await responseNew.Content.ReadFromJsonAsync<MovieInput[]>();
                 return Results.Json(responseNewMovies);
@@ -189,13 +189,13 @@ namespace proxy.Controllers
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.GetAsync($"{apiPath}");
-            var responseBody = await response.Content.ReadAsStringAsync();
             if (id != null)
             {
-                return Results.Json(responseBody);
+                var responsePayment = await response.Content.ReadFromJsonAsync<PaymentInput>();
+                return Results.Json(responsePayment);
             }
-            JArray array = JArray.Parse(responseBody);
-            return Results.Json(array.ToString(Newtonsoft.Json.Formatting.None));
+            var responsePayments = await response.Content.ReadFromJsonAsync<PaymentInput[]>();
+            return Results.Json(responsePayments);
         }
         [HttpPost]
         [Route("/api/payments")]
@@ -210,19 +210,23 @@ namespace proxy.Controllers
         }
         [HttpGet]
         [Route("/api/subscriptions")]
-        public async Task<IResult> GetSubscriptions([FromQuery] int? user_id)
+        public async Task<IResult> GetSubscriptions([FromQuery] int? id)
         {
             var apiPath = "/api/subscriptions";
-            if (user_id != null)
+            if (id != null)
             {
-                apiPath += $"?id={user_id}";
+                apiPath += $"?id={id}";
             }
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.GetAsync($"{apiPath}");
-            var responseBody = await response.Content.ReadAsStringAsync();
-            JArray array = JArray.Parse(responseBody);
-            return Results.Json(array.ToString(Newtonsoft.Json.Formatting.None));
+            if (id != null)
+            {
+                var responseSubscription = await response.Content.ReadFromJsonAsync<SubscriptionInput>();
+                return Results.Json(responseSubscription);
+            }
+            var responseSubscriptions = await response.Content.ReadFromJsonAsync<SubscriptionInput[]>();
+            return Results.Json(responseSubscriptions);
         }
         [HttpPost]
         [Route("/api/subscriptions")]
