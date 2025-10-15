@@ -36,8 +36,8 @@ namespace proxy.Controllers
             _httpClientFactory = httpClientFactory;
             _featureManager = featureManager;
 
-            _moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
-            _monolithURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "http://localhost:8080";
+            _moviesServiceURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "http://localhost:8081";
+            _monolithURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8080";
             _eventsServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "http://localhost:8082";
         }
 
