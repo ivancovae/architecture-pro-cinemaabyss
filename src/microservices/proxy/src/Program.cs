@@ -14,6 +14,17 @@ namespace proxy
     {
         public static void Main(string[] args)
         {
+            //Environment.SetEnvironmentVariable("GRADUAL_MIGRATION", "true");
+            //Environment.SetEnvironmentVariable("MOVIES_MIGRATION_PERCENT", "100");
+
+            var gradualMigration = Environment.GetEnvironmentVariable("GRADUAL_MIGRATION");
+            if (gradualMigration == "true")
+            {
+                var moviesMigrationPercent = Environment.GetEnvironmentVariable("MOVIES_MIGRATION_PERCENT");
+                Environment.SetEnvironmentVariable("FeatureFlags__MoviesPercentage__EnabledFor__0__Name", "Microsoft.Percentage");
+                Environment.SetEnvironmentVariable("FeatureFlags__MoviesPercentage__EnabledFor__0__Parameters__Value", moviesMigrationPercent);
+            }
+            
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -29,33 +40,7 @@ namespace proxy
                     var _moviesMigrationPercent = configuration.GetValue<string>("MOVIES_MIGRATION_PERCENT");
                     Console.WriteLine($"MOVIES_MIGRATION_PERCENT={_moviesMigrationPercent}");
 
-                    var parameters = new JObject
-                            {
-                                { "Value", _moviesMigrationPercent }
-                            };
-                    var percentage = new JObject
-                            {
-                                { "Name", "Microsoft.Percentage" },
-                                { "Parameters", parameters }
-                            };
-
-                    var listParams = new JArray
-                            {
-                                percentage
-                            };
-                    var moviesPercentageFilter = new JObject
-                            {
-                                { "EnabledFor", listParams }
-                            };
-
-                    JObject featureFlagsSection = new JObject
-                            {
-                                { "Movies", _gradualMigration },
-                                { "MoviesPercentageFilter", moviesPercentageFilter }
-                            };
-
-                    configuration["FeatureFlags"] = featureFlagsSection.ToString(Newtonsoft.Json.Formatting.None);
-                    Console.WriteLine($"FeatureFlags={configuration["FeatureFlags"]}");
+                    Console.WriteLine($"FeatureFlags={configuration.GetSection("FeatureFlags")}");
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -64,10 +49,9 @@ namespace proxy
                 })
             .ConfigureServices((builder, services) =>
                 {
-                    var featureFlags = builder.Configuration.GetSection("FeatureFlags");
-                    services.AddFeatureManagement(featureFlags)
-                            .AddFeatureFilter<PercentageFilter>()
-                            .AddFeatureFilter<TimeWindowFilter>();
+                    services
+                        .AddFeatureManagement(builder.Configuration.GetSection("FeatureFlags"))
+                        .AddFeatureFilter<PercentageFilter>();
                     services.AddHttpClient();
                     services.AddControllers().AddNewtonsoftJson();
                     services.AddEndpointsApiExplorer();
