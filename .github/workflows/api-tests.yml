@@ -2,10 +2,10 @@ name: API Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ '*' ]
   pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: [ '*' ]
+  workflow_dispatch:  
     inputs:
       environment:
         description: 'Environment to run tests against'
