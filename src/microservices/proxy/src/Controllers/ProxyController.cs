@@ -35,10 +35,12 @@ namespace proxy.Controllers
             _configuration = configuration; 
             _httpClientFactory = httpClientFactory;
             _featureManager = featureManager;
-
-            _moviesServiceURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL");
-            _monolithURL = _configuration.GetValue<string>("MONOLITH_URL");
-            _eventsServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL");
+            //"MOVIES_SERVICE_URL": "http://localhost:8081",
+            //"MONOLITH_URL": "http://localhost:8080",
+            //"EVENTS_SERVICE_URL": "http://localhost:8082"
+            _moviesServiceURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "http://localhost:8081";
+            _monolithURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8080";
+            _eventsServiceURL = _configuration.GetValue<string>("EVENTS_SERVICE_URL") ?? "http://localhost:8082";
         }
 
         [Route("/about")]
@@ -69,17 +71,17 @@ namespace proxy.Controllers
         [Route("/health")]
         public IResult Get()
         {
-            var JSuccess = new JObject() { { "status", true} };
-            return Results.Text(JSuccess.ToString(Newtonsoft.Json.Formatting.None), "application/json");
+            var status = new HealthStatus() {  status = true };
+            return Results.Json(status);
         }
         [HttpGet]
         [Route("/api/movies")]
-        public async Task<IResult> GetMovies([FromQuery] int? movie_id)
+        public async Task<IResult> GetMovies([FromQuery] int? id)
         {
             var apiPath = "/api/movies";
-            if (movie_id != null)
+            if (id != null)
             {
-                apiPath += $"?{movie_id}";
+                apiPath += $"?id={id}";
             }
             var newAlgorithm = await _featureManager.IsEnabledAsync("MoviesPercentage");
             if (newAlgorithm)
@@ -88,17 +90,26 @@ namespace proxy.Controllers
                 var httpClientNew = _httpClientFactory?.CreateClient();
                 httpClientNew.BaseAddress = new Uri(_moviesServiceURL);
                 var responseNew = await httpClientNew.GetAsync($"{apiPath}");
-                var responseNewBody = await responseNew.Content.ReadAsStringAsync();
-                JArray arrayNew = JArray.Parse(responseNewBody);
-                return Results.Text(arrayNew.ToString(Newtonsoft.Json.Formatting.None), "application/json");
+                if (id != null)
+                {
+                    var responseMovie = await responseNew.Content.ReadFromJsonAsync<MovieInput>();
+                    return Results.Json(responseMovie, statusCode: 201);
+                }
+                var responseNewMovies = await responseNew.Content.ReadFromJsonAsync<MovieInput[]>();
+                return Results.Json(responseNewMovies);
             }
             _logger.Log(LogLevel.Information, $"request to old {_monolithURL}");
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
-            JArray array = JArray.Parse(responseBody);
-            return Results.Text(array.ToString(Newtonsoft.Json.Formatting.None), "application/json");
+            if (id != null)
+            {
+                var responseMovie = await response.Content.ReadFromJsonAsync<MovieInput>();
+                return Results.Json(responseMovie, statusCode: 201);
+            }
+            var responseMovies = await response.Content.ReadFromJsonAsync<MovieInput[]>();
+            return Results.Json(responseMovies);
         }
         [HttpPost]
         [Route("/api/movies")]
@@ -111,15 +122,15 @@ namespace proxy.Controllers
                 var httpNewClient = _httpClientFactory?.CreateClient();
                 httpNewClient.BaseAddress = new Uri(_moviesServiceURL);
                 var responseNew = await httpNewClient.PostAsync("/api/movies", httpContentNew);
-                var responseNewBody = await responseNew.Content.ReadAsStringAsync();
-                return Results.Json(responseNewBody);
+                var responseNewMovie = await responseNew.Content.ReadFromJsonAsync<MovieInput>();
+                return Results.Json(responseNewMovie, statusCode: 201);
             }
             var httpContent = JsonContent.Create(movie);
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.PostAsync("/api/movies", httpContent);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            var responseUser = await response.Content.ReadFromJsonAsync<MovieInput>();
+            return Results.Json(responseUser, statusCode: 201);
         }
         [HttpGet(Name = "/api/movies/health")]
         [Route("/api/movies/health")]
@@ -128,19 +139,28 @@ namespace proxy.Controllers
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_moviesServiceURL);
             var response = await httpClient.GetAsync($"/api/movies/health");
-            var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Text(responseBody, "application/json");
+            var responseBody = await response.Content.ReadFromJsonAsync<HealthStatus>();
+            return Results.Json(responseBody);
         }
         [HttpGet]
         [Route("/api/users")]
-        public async Task<IResult> GetUsers()
+        public async Task<IResult> GetUsers([FromQuery] int? id)
         {
+            var apiPath = "/api/users";
+            if (id != null)
+            {
+                apiPath += $"?id={id}";
+            }
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
-            var response = await httpClient.GetAsync("/api/users");
-            var responseBody = await response.Content.ReadAsStringAsync();
-            JArray array = JArray.Parse(responseBody);
-            return Results.Text(array.ToString(Newtonsoft.Json.Formatting.None), "application/json");
+            var response = await httpClient.GetAsync($"{apiPath}");
+            if (id != null)
+            {
+                var responseUser = await response.Content.ReadFromJsonAsync<UserInput>();
+                return Results.Json(responseUser);
+            }
+            var responseUsers = await response.Content.ReadFromJsonAsync<UserInput[]>();
+            return Results.Json(responseUsers);
         }
         [HttpPost]
         [Route("/api/users")]
@@ -150,23 +170,27 @@ namespace proxy.Controllers
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.PostAsync("/api/users", httpContent);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadFromJsonAsync<UserInput>();
+                return Results.Json(responseBody, statusCode: 201);
+            }
+            return Results.Problem();
         }
         [HttpGet]
         [Route("/api/payments")]
-        public async Task<IResult> GetPayments([FromQuery]int? user_id)
+        public async Task<IResult> GetPayments([FromQuery]int? id)
         {
             var apiPath = "/api/payments";
-            if (user_id != null)
+            if (id != null)
             {
-                apiPath += $"?{user_id}";
+                apiPath += $"?id={id}";
             }
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.GetAsync($"{apiPath}");
             var responseBody = await response.Content.ReadAsStringAsync();
-            if (user_id != null)
+            if (id != null)
             {
                 return Results.Json(responseBody);
             }
@@ -181,8 +205,8 @@ namespace proxy.Controllers
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.PostAsync($"/api/payments", httpContent);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            var responsePayment = await response.Content.ReadFromJsonAsync<PaymentInput>();
+            return Results.Json(responsePayment, statusCode: 201);
         }
         [HttpGet]
         [Route("/api/subscriptions")]
@@ -191,7 +215,7 @@ namespace proxy.Controllers
             var apiPath = "/api/subscriptions";
             if (user_id != null)
             {
-                apiPath += $"?{user_id}";
+                apiPath += $"?id={user_id}";
             }
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
@@ -208,8 +232,8 @@ namespace proxy.Controllers
             var httpClient = _httpClientFactory?.CreateClient();
             httpClient.BaseAddress = new Uri(_monolithURL);
             var response = await httpClient.PostAsync($"/api/subscriptions", httpContent);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            return Results.Json(responseBody);
+            var responseSubscription = await response.Content.ReadFromJsonAsync<SubscriptionInput>();
+            return Results.Json(responseSubscription, statusCode: 201);
         }
         [HttpGet]
         [Route("/api/events/health")]
@@ -220,7 +244,7 @@ namespace proxy.Controllers
             var response = await httpClient.GetAsync($"/api/events/health");
             if (response.IsSuccessStatusCode)
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
+                var responseBody = await response.Content.ReadFromJsonAsync<HealthStatus>();
                 return Results.Json(responseBody);
             }
             return Results.Problem();
@@ -235,7 +259,7 @@ namespace proxy.Controllers
             var response = await httpClient.PostAsync($"/api/events/movie", httpContent);
             var responseBody = await response.Content.ReadAsStringAsync();
             JObject objBody = JObject.Parse(responseBody);
-            return Results.Text(GetEventResult(), "application/json");
+            return Results.Text(GetEventResult(), "application/json", statusCode: 201);
         }
         [HttpPost(Name = "api/events/payment")]
         [Route("/api/events/payment")]

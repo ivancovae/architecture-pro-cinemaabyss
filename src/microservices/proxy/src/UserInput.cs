@@ -4,7 +4,7 @@ namespace proxy
 {
     public class UserInput
     {
-        public string id { get; set; }
+        public int id { get; set; }
         [Required]
         public string username { get; set; }
         [Required]
