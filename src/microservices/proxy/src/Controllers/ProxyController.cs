@@ -21,6 +21,7 @@ namespace proxy.Controllers
     {
         private readonly ILogger<ProxyController> _logger;
         private IConfiguration _configuration;
+        private readonly IFeatureManager _featureManager;
 
         private string _moviesServiceURL;
         private string _monolithURL;
@@ -28,11 +29,12 @@ namespace proxy.Controllers
 
         IHttpClientFactory _httpClientFactory;
 
-        public ProxyController(IHttpClientFactory httpClientFactory,  IConfiguration configuration, ILogger<ProxyController> logger)
+        public ProxyController(IFeatureManager featureManager, IHttpClientFactory httpClientFactory,  IConfiguration configuration, ILogger<ProxyController> logger)
         {
             _logger = logger;
             _configuration = configuration; 
             _httpClientFactory = httpClientFactory;
+            _featureManager = featureManager;
 
             _moviesServiceURL = _configuration.GetValue<string>("MONOLITH_URL") ?? "http://localhost:8081";
             _monolithURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "http://localhost:8080";
@@ -73,7 +75,7 @@ namespace proxy.Controllers
         [HttpGet(Name = "/api/movies")]
         [Route("/api/movies")]
         [FeatureGate("Movies")]
-        public async Task<IResult> GetMovies(IFeatureManager _featureManager)
+        public async Task<IResult> GetMovies()
         {
             var apiPath = "/api/movies";
             var _moviesServiceURL = _configuration.GetValue<string>("MOVIES_SERVICE_URL") ?? "";
