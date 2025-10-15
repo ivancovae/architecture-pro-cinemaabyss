@@ -154,3 +154,10 @@ go.work
 
 # Postman tests reports
 tests/postman/reports/
+src/microservices/events/src/obj/
+src/microservices/proxy/src — копия/
+src/microservices/events/.vs/
+src/microservices/events/src/.vs/
+src/microservices/proxy/src/.vs/
+src/microservices/proxy/src/obj/
+.vs/

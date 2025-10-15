@@ -4,8 +4,8 @@
 
 1. Спроектируйте to be архитектуру КиноБездны, разделив всю систему на отдельные домены и организовав интеграционное взаимодействие и единую точку вызова сервисов.
 Результат представьте в виде контейнерной диаграммы в нотации С4.
-Добавьте ссылку на файл в этот шаблон
-[ссылка на файл](ссылка)
+
+[Диаграмма контейнеров в модели C4](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/schemas/C4_Containers.puml)
 
 ## Задание 2
 
@@ -57,8 +57,8 @@
 
 Необходимые тесты для проверки этого API вызываются при запуске npm run test:local из папки tests/postman 
 Приложите скриншот тестов и скриншот состояния топиков Kafka http://localhost:8090 
-
-
+[скриншот тестов](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/tests.PNG)
+[скриншот состояния топиков Kafka](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/kafkaui.PNG)
 ## Задание 3
 
 Команда начала переезд в Kubernetes для лучшего масштабирования и повышения надежности. 
@@ -270,9 +270,12 @@ cat .docker/config.json | base64
   Часть тестов с health-чек упадет, но создание событий отработает.
   Откройте логи event-service и сделайте скриншот обработки событий
 
+
 #### Шаг 3
 Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и  скриншот вывода event-service после вызова тестов.
 
+[скриншота вывода при вызове https://cinemaabyss.example.com/api/movies](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/api_movies.PNG)
+[логи event-service](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/partTests.PNG)
 
 ## Задание 4
 Для простоты дальнейшего обновления и развертывания вам как архитектуру необходимо так же реализовать helm-чарты для прокси-сервиса и проверить работу 
@@ -347,7 +350,9 @@ minikube tunnel
 Потом вызовите 
 https://cinemaabyss.example.com/api/movies
 и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
-
+[скриншот развертывания helm 1](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/helm.PNG)
+[скриншот развертывания helm 2](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/helmRes.PNG)
+[вывод https://cinemaabyss.example.com/api/movies](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/helmResKube.PNG)
 
 # Задание 5
 Компания планирует активно развиваться и для повышения надежности, безопасности, реализации сетевых паттернов типа Circuit Breaker и канареечного деплоя вам как архитектору необходимо развернуть istio и настроить circuit breaker для monolith и movies сервисов.
@@ -413,6 +418,11 @@ You can see 21 for the upstream_rq_pending_overflow value which means 21 calls s
 ```
 
 Приложите скриншот работы circuit breaker'а
+
+
+[скриншот работы circuit breaker'а 1](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/fortio1.PNG)
+
+[скриншот работы circuit breaker'а 2](https://github.com/ivancovae/architecture-pro-cinemaabyss/blob/cinema/screenShots/fortio2.PNG)
 
 Удаляем все
 ```bash

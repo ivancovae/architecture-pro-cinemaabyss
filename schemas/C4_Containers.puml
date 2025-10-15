@@ -1,0 +1,160 @@
+@startuml C4_Container_Diagram
+title Cinema Abyss Containers Diagram
+
+skinparam defaultTextAlignment center
+
+set separator none
+
+top to bottom direction
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons/dotnet.puml
+!include $ICONURL/devicons/java.puml
+!include $ICONURL/devicons/go.puml
+!include $ICONURL/devicons/nodejs.puml
+!include $ICONURL/devicons2/csharp.puml
+
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/font-awesome/server.puml
+!include $ICONURL/font-awesome-5/database.puml
+
+!include <C4/C4_Container>
+
+Boundary(boundaryUsers, "<person>") {
+    Person(user, "Пользователь", "User")
+}
+
+Boundary(boundaryAdmins, "<person>") {
+    Person(admin, "Администратор", "Admin")
+}
+
+Enterprise_Boundary("CinemaAbyss_Boundary", "Cinema Abyss") {
+    System_Boundary("CinemaAbyssWeb_boundary", "Cinema Abyss Web Application") {
+        Container(CinemaAbyss.WebApplication, "Web Application", $techn="JS, React, Node.js", $descr="АРМ для пользователей")
+        Container(CinemaAbyss.AdminWebApplication, "Web Application", $techn="JS, React, Node.js", $descr="АРМ администрирования")
+    }
+    System_Boundary("CinemaAbyssMobile_boundary", "Cinema Abyss Mobile Application") {
+        Container(CinemaAbyss.MobileApplication, "Mobile Application", $techn="Android, IOS", $descr="Мобильное приложение")
+    }
+    System_Boundary("CinemaAbyssSmartTV_boundary", "Cinema Abyss SmartTV Application") {
+        Container(CinemaAbyss.SmartTVApplication, "SmartTV Application", $techn="Android, LinuxOS", $descr="Приложение для SmartTV")
+    }
+
+    System_Boundary("CinemaAbyssSystem_boundary", "Cinema Abyss System") {
+        Boundary(boundaryApiGateway, "<Прокси сервис>") {
+            Container(CinemaAbyssSystem.ApiGateWay, "API gateway", $techn="dotnet, csharp", $descr="Единая точка входа для приложения", $sprite="dotnet")
+        }
+        Boundary(boundaryAuthorization, "<Домен авторизации пользователей>") {
+            Container(CinemaAbyssSystem.AuthorizationService, "Authorization service", $techn="dotnet, csharp", $descr="Сервис Авторизации в системе", $sprite="dotnet")       
+            DEV_POSTGRESQL(CinemaAbyssSystem.AuthorizationService.Database, "БД пользователей системы", database, #White) #RoyalBlue
+        }
+        Boundary(boundaryAdministration, "<Домен администрирования>") {        
+            Container(CinemaAbyssSystem.AdminService, "Admin service", $techn="dotnet, csharp", $descr="Сервис Администрирования и управления", $sprite="dotnet")       
+            DEV_POSTGRESQL(CinemaAbyssSystem.AdminService.Database, "БД Администрирования и управления", database, #White) #RoyalBlue
+        }        
+        Boundary(boundaryMetaMovies, "<Домен метаданных фильмов>") {        
+            Container(CinemaAbyssSystem.MetaMoviesService, "Meta Movies service", $techn="dotnet, csharp", $descr="Сервис хранения метаданных фильмов", $sprite="dotnet")
+            DEV_POSTGRESQL(CinemaAbyssSystem.MetaMoviesService.Database, "БД метаданных фильмов", database, #White) #RoyalBlue
+        }
+        Boundary(boundaryRatingAndFavorite, "<Домен избранные и оценки фильмов>") {        
+            Container(CinemaAbyssSystem.RatingAndFavoriteService, "Rating and Favorite service", $techn="dotnet, csharp", $descr="Сервис хранения избранные и оценки фильмов", $sprite="dotnet")
+            DEV_POSTGRESQL(CinemaAbyssSystem.RatingAndFavoriteService.Database, "БД избранные и оценки фильмов", database, #White) #RoyalBlue
+        }
+        Boundary(boundarySubscription, "<Домен пользовательских подписок>") { 
+            Container(CinemaAbyssSystem.SubscriptionService, "Subscription service", $techn="nodejs, express, js", $descr="Сервис пользовательских подписок", $sprite="nodejs")
+            DEV_POSTGRESQL(CinemaAbyssSystem.SubscriptionService.Database, "БД пользовательских подписок", database, #White) #RoyalBlue
+        }
+        Boundary(boundaryPayment, "<Домен управления платежами>") { 
+            Container(CinemaAbyssSystem.PaymentService, "Payment service", $techn="dotnet, csharp", $descr="Сервис управления платежами", $sprite="dotnet")
+            DEV_POSTGRESQL(CinemaAbyssSystem.PaymentService.Database, "БД управления платежами", database, #White) #RoyalBlue
+        }
+        Boundary(boundaryHistoryMovies, "<Домен истории просмотров>") { 
+            Container(CinemaAbyssSystem.HistoryMoviesService, "History Movies service", $techn="Golang", $descr="Сервис истории просмотров", $sprite="go")
+            DEV_POSTGRESQL(CinemaAbyssSystem.HistoryMoviesService.Database, "БД истории просмотров", database, #White) #RoyalBlue
+        }
+        Boundary(boundaryRecommendationMovies, "<Домен рекомендованных подборок>") { 
+            Container(CinemaAbyssSystem.RecommendationService, "History Movies service", $techn="Golang", $descr="Сервис рекомендованных подборок", $sprite="go")
+            DEV_POSTGRESQL(CinemaAbyssSystem.RecommendationService.Database, "БД рекомендованных подборок", database, #White) #RoyalBlue
+        }
+        Boundary(boundaryNotification, "<Домен уведомлений>") { 
+            Container(CinemaAbyssSystem.NotificationService, "Notification service", $techn="dotnet, csharp", $descr="Сервис уведомлений", $sprite="dotnet")
+            DEV_POSTGRESQL(CinemaAbyssSystem.NotificationService.Database, "БД уведомлений", database, #White) #RoyalBlue
+        }
+
+        SystemQueue_Ext(CinemaAbyssSystem.ExtSystem.Kafka, "Apache Kafka", $descr="Брокер сообщений")    
+        System_Ext(CinemaAbyssSystem.ExtSystem.KeyCloak, "KeyCloak", $descr="Система авторизации и аутонтификации пользователей")
+    }
+}
+
+Boundary(boundaryMobile, "<mobile system>") {
+    SystemQueue_Ext(CinemaAbyssSystem.ExtSystem.NotificationSMS, "Notification SMS", $descr="Сервис отправки СМС")
+    SystemQueue_Ext(CinemaAbyssSystem.ExtSystem.NotificationPush, "Notification Push", $descr="Сервис отправки Push-уведомлений")
+}
+Boundary(boundaryMail, "<mail system>") {
+    SystemQueue_Ext(CinemaAbyssSystem.ExtSystem.NotificationEmail, "Notification Email", $descr="Сервис отправки по почте")
+}
+
+Boundary(boundaryExtRecommendation, "<recommendation system>") {
+    SystemQueue_Ext(CinemaAbyssSystem.ExtSystem.Recommendation, "Recommendation Systen", $descr="Рекомендательная система")
+}
+
+'################# User Rels ##########################
+Rel(user, CinemaAbyss.WebApplication, "", $techn="")
+Rel(CinemaAbyss.WebApplication, CinemaAbyssSystem.ApiGateWay, "REST-запрос", $techn="HTTPS/JSON")
+Rel(user, CinemaAbyss.MobileApplication, "", $techn="")
+Rel(CinemaAbyss.MobileApplication, CinemaAbyssSystem.ApiGateWay, "REST-запрос", $techn="HTTPS/JSON")
+Rel(user, CinemaAbyss.SmartTVApplication, "", $techn="")
+Rel(CinemaAbyss.SmartTVApplication, CinemaAbyssSystem.ApiGateWay, "REST-запрос", $techn="HTTPS/JSON")
+
+'################# Admin Rels ##########################
+Rel(admin, CinemaAbyss.AdminWebApplication, "", $techn="")
+Rel(CinemaAbyss.AdminWebApplication, CinemaAbyssSystem.ApiGateWay, "REST-запрос", $techn="HTTPS/JSON")
+
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.ExtSystem.KeyCloak, "", $techn="")
+Rel(CinemaAbyssSystem.ExtSystem.KeyCloak, CinemaAbyss.WebApplication, "JWT-токен")
+Rel(CinemaAbyssSystem.ExtSystem.KeyCloak, CinemaAbyss.AdminWebApplication, "JWT-токен")
+Rel(CinemaAbyssSystem.ExtSystem.KeyCloak, CinemaAbyss.SmartTVApplication, "JWT-токен")
+Rel(CinemaAbyssSystem.ExtSystem.KeyCloak, CinemaAbyss.MobileApplication, "JWT-токен")
+
+'################# DB connection Rels ##########################
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.AuthorizationService.Database, "CRUD обращение")
+Rel(CinemaAbyssSystem.AdminService, CinemaAbyssSystem.AdminService.Database, "CRUD обращение", $techn="SQL")
+Rel(CinemaAbyssSystem.ExtSystem.KeyCloak, CinemaAbyssSystem.AdminService.Database, "CRUD обращение", $techn="SQL")
+Rel(CinemaAbyssSystem.MetaMoviesService, CinemaAbyssSystem.MetaMoviesService.Database, "CRUD обращение", $techn="SQL")
+Rel(CinemaAbyssSystem.SubscriptionService, CinemaAbyssSystem.SubscriptionService.Database, "CRUD обращение", $techn="SQL")
+Rel(CinemaAbyssSystem.PaymentService, CinemaAbyssSystem.PaymentService.Database, "CRUD обращение", $techn="SQL")
+Rel(CinemaAbyssSystem.RatingAndFavoriteService, CinemaAbyssSystem.RatingAndFavoriteService.Database, "CRUD обращение", $techn="SQL")
+Rel(CinemaAbyssSystem.HistoryMoviesService, CinemaAbyssSystem.HistoryMoviesService.Database, "CRUD обращение", $techn="SQL")
+Rel(CinemaAbyssSystem.NotificationService, CinemaAbyssSystem.NotificationService.Database, "CRUD обращение", $techn="SQL")
+
+'################# Gateway connections Rels ##########################'
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.AuthorizationService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.AdminService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.MetaMoviesService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.RatingAndFavoriteService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.SubscriptionService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.PaymentService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.HistoryMoviesService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.RecommendationService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ApiGateWay, CinemaAbyssSystem.NotificationService, "REST-запрос", $techn="HTTPS/JSON")
+
+
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.MetaMoviesService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.RatingAndFavoriteService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.SubscriptionService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.AuthorizationService, CinemaAbyssSystem.PaymentService, "REST-запрос", $techn="HTTPS/JSON")
+Rel(CinemaAbyssSystem.ExtSystem.KeyCloak, CinemaAbyssSystem.ApiGateWay, "REST-запрос", $techn="HTTPS/JSON")
+
+Rel(CinemaAbyssSystem.ExtSystem.Recommendation, CinemaAbyssSystem.ExtSystem.Kafka, "Очередь")
+Rel(CinemaAbyssSystem.ExtSystem.Kafka, CinemaAbyssSystem.ExtSystem.Recommendation, "Очередь")
+Rel(CinemaAbyssSystem.HistoryMoviesService, CinemaAbyssSystem.ExtSystem.Kafka, "Очередь")
+Rel(CinemaAbyssSystem.RatingAndFavoriteService, CinemaAbyssSystem.ExtSystem.Kafka, "Очередь")
+Rel(CinemaAbyssSystem.ExtSystem.Kafka, CinemaAbyssSystem.RecommendationService, "Очередь")
+Rel(CinemaAbyssSystem.ExtSystem.Kafka, CinemaAbyssSystem.NotificationService, "Очередь")
+
+Rel(CinemaAbyssSystem.NotificationService, CinemaAbyssSystem.ExtSystem.NotificationSMS, "")
+Rel(CinemaAbyssSystem.NotificationService, CinemaAbyssSystem.ExtSystem.NotificationPush, "")
+Rel(CinemaAbyssSystem.NotificationService, CinemaAbyssSystem.ExtSystem.NotificationEmail, "")
+
+@enduml
